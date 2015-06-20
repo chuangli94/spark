@@ -12,11 +12,12 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
 
-mainClassName = 'main.java.core.Application'
-
 jar {
 	baseName = 'spark-db-rest-service'
 	version = '0.1.0'
+	manifest {
+		attributes 'Main-Class': 'core.Application'
+	}
 }
 
 repositories{
@@ -31,7 +32,6 @@ dependencies {
 	compile("org.springframework.boot:spring-boot-starter-data-jpa")
 	compile("mysql:mysql-connector-java")
 	testCompile("junit:junit")
-	compile files("src/main/resources")
 }
 
 task wrapper(type: Wrapper) {

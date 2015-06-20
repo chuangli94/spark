@@ -1,5 +1,6 @@
 package core;
 
+
 public class AccountResp {
 	private final long id;
 	private final String username;
