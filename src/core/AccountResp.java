@@ -1,4 +1,4 @@
-package main.java.core;
+package core;
 
 public class AccountResp {
 	private final long id;

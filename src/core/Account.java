@@ -1,4 +1,4 @@
-package main.java.core;
+package core;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
