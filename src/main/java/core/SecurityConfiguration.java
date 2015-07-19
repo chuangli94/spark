@@ -1,13 +1,13 @@
 package core;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -19,22 +19,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 	
-    @Value("${spring.datasource.driverClassName}")
-    private String databaseDriverClassName;
- 
-    @Value("${spring.datasource.url}")
-    private String datasourceUrl;
- 
-    @Value("${spring.datasource.username}")
-    private String databaseUsername;
- 
-    @Value("${spring.datasource.password}")
-    private String databasePassword;
+	@Autowired
+	DataSource ds;
     
 	@Bean 
     public TokenStore tokenStore(){
 		return new InMemoryTokenStore();
 	}
+	
+	
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -62,14 +55,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder)
 	 */
 	
+	
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
     	
-        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
-        ds.setDriverClassName(databaseDriverClassName);
-        ds.setUrl(datasourceUrl);
-        ds.setUsername(databaseUsername);
-        ds.setPassword(databasePassword);
         
         auth.jdbcAuthentication().dataSource(ds)
         .usersByUsernameQuery("select username, password, enabled from users where username=?")

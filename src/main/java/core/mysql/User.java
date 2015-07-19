@@ -1,4 +1,4 @@
-package core;
+package core.mysql;
 
 
 import java.io.Serializable;
@@ -31,14 +31,25 @@ public class User implements Serializable {
 	@Column
 	private String accessToken;
 	
+	@Column
+	private String gcmRegId;
+	
 	protected User() {}
 	
-	public User(String username, String password){
+	public User(String username, String password, String gcmRegId){
 		this.username = username;
 		this.password = password;
+		this.gcmRegId = gcmRegId;
 		this.enabled = true;
 	}
 	
+	public String getGcmRegId(){
+		return gcmRegId;
+	}
+	
+	public void setGcmRegId(String gcmRegId){
+		this.gcmRegId = gcmRegId;
+	}
 
 	public String getAccessToken(){
 		return accessToken;

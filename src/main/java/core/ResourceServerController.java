@@ -19,7 +19,7 @@ public class ResourceServerController extends ResourceServerConfigurerAdapter{
 	public void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
 		http
-		.requestMatchers().antMatchers("/db", "/refreshtoken")
+		.requestMatchers().antMatchers("/db", "/refreshtoken", "/pushitem")
 		.and()
 		.authorizeRequests()
 		.anyRequest().access("#oauth2.hasScope('read')");

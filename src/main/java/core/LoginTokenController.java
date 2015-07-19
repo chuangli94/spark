@@ -1,6 +1,8 @@
 package core;
 
 import java.io.Serializable;
+import core.mysql.UserRepository;
+import core.mysql.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -51,7 +52,7 @@ public class LoginTokenController {
 		if (username == null){
 			return null;
 		}
-		List<core.User> users = userRepo.findByUsername(username);
+		List<core.mysql.User> users = userRepo.findByUsername(username);
 		if (users.isEmpty() || users.size() != 1){
 			return null;
 		}
@@ -78,7 +79,7 @@ public class LoginTokenController {
 	            resourceIds, null, responseTypes, extensionProperties);
 	
 	
-	    User userPrincipal = new User(username, "", true, true, true, true, authorities);
+	    org.springframework.security.core.userdetails.User userPrincipal = new org.springframework.security.core.userdetails.User(username, "", true, true, true, true, authorities);
 	    
 	    DefaultTokenServices tokenServices = new DefaultTokenServices();
 	    tokenServices.setTokenStore(tokenStore);
@@ -87,7 +88,7 @@ public class LoginTokenController {
 	    OAuth2Authentication oAuth2 = new OAuth2Authentication(oAuth2Request, authenticationToken);
 	    OAuth2AccessToken token = tokenServices.createAccessToken(oAuth2);
 	    
-		core.User user = users.get(0);
+		core.mysql.User user = users.get(0);
 		user.setAccessToken(token.getValue());
 		userRepo.save(user);
 	    return token;

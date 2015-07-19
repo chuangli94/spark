@@ -22,6 +22,13 @@ jar {
 
 repositories{
 	mavenCentral()
+	maven{
+		url "http://m2.neo4j.org/content/repositories/releases/"
+	}
+	maven{
+		url "http://repo.spring.io/libs-snapshot-continuous-local"
+	}
+
 }
 
 sourceCompatibility = 1.8
@@ -33,7 +40,17 @@ dependencies {
 	compile("org.springframework.boot:spring-boot-starter-actuator:1.2.4.RELEASE")
 	compile("org.springframework.security.oauth:spring-security-oauth2:2.0.7.RELEASE")
 	compile("org.thymeleaf:thymeleaf-spring4:2.1.2.RELEASE")
+	compile("org.neo4j:neo4j-cypher-dsl:2.0.1")
+	compile("org.springframework.data:spring-data-neo4j:3.3.1.RELEASE")
+	compile("org.springframework.data:spring-data-neo4j-rest:3.3.1.RELEASE")
+	compile("org.springframework.data:spring-data-mongodb:1.7.1.RELEASE")
 	compile("mysql:mysql-connector-java:5.1.35")
+	compile("com.amazonaws:aws-java-sdk-s3:1.10.2")
+	compile("com.amazonaws:aws-java-sdk-sts:1.10.2")
+/*	testCompile(group: 'org.neo4j', 
+               name: 'neo4j-ogm-test', 
+               version: '1.0.0.BUILD-SNAPSHOT', 
+               classifier: 'tests')*/
 	testCompile("junit:junit")
 }
 

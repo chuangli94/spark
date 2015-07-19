@@ -1,6 +1,8 @@
 package core;
 
 import java.io.Serializable;
+import core.mysql.FbUserRepository;
+import core.mysql.FbUser;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
