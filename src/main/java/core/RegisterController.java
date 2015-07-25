@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.neo4j.graphdb.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.neo4j.core.GraphDatabase;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import core.mongodb.UserDocument;
@@ -49,7 +52,8 @@ public class RegisterController {
 	Neo4jTemplate neo4jTemplate;
 	@Autowired
 	UserDocumentRepository userDocumentRepo;
-	
+	@Value("${awsuseruploadbucketname}")
+	private String awsBucketName;
 
 	
 	@Transactional

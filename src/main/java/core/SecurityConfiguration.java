@@ -1,8 +1,10 @@
 package core;
 
+import javax.servlet.MultipartConfigElement;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.embedded.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -27,8 +29,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 		return new InMemoryTokenStore();
 	}
 	
-	
-	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests().antMatchers("/logintoken", "/oauth/authorize").authenticated().and()
@@ -40,7 +40,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
         .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/login")
         .permitAll()
         .and()
-        .httpBasic();
+        .httpBasic()
+        .and().csrf().disable();
 	}
 	
 	/*

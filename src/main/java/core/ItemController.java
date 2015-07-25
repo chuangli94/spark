@@ -97,11 +97,13 @@ public class ItemController {
 	
 	
 	@RequestMapping(value="/broadcastitem", method=RequestMethod.GET)
-	public String broadcastItem(@RequestHeader(value="Authorization") String token, @RequestHeader(value="item") String item){
+	public String broadcastItem(@RequestHeader(value="Authorization") String token, @RequestHeader(value="Item") String item){
 		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));
 		String name = user.getUsername();
 		
+		Integer like = 1;
 		List<String> broadcastNames = null;
+		
 		
 		Transaction tx = graphDatabase.beginTx();
 		try {
@@ -116,18 +118,73 @@ public class ItemController {
 					broadcastNames.add(subscribedRelationship.startNode.name);
 				}
 			}
-						
+			
+			
+			Set<ItemRelationship> itemRelationships = itemRelationshipRepo.findByEndNodeIdAndItemName(userNode.id, item);
+//			subscribedRelationshipRepo.save(subscribedRelationships);
+			List<SubscribedRelationship> updatedSubscribedRelationships = new ArrayList<SubscribedRelationship>();
+			List<ItemRelationship> newItemRelationships = new ArrayList<ItemRelationship>();
+			List<UserNode> itemBroadcastNodes = new ArrayList<UserNode>();
+			for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
+				if (subscribedRelationship.startNode.id.equals(userNode.id)){
+					itemBroadcastNodes.add(subscribedRelationship.endNode);
+				} else {
+					itemBroadcastNodes.add(subscribedRelationship.startNode);
+				}
+			}
+
+
+			List<UserNode> deleteBroadcastNodes = new ArrayList<UserNode>();
+			for (UserNode itemBroadcastNode : itemBroadcastNodes){
+				for (ItemRelationship itemRelationship: itemRelationships){
+					if (itemRelationship.startNode.id.equals(itemBroadcastNode.id)){
+						deleteBroadcastNodes.add(itemBroadcastNode);
+					}
+				}
+			}
+			
+			itemBroadcastNodes.removeAll(deleteBroadcastNodes);
+
+
+			for (ItemRelationship itemRelationship: itemRelationships){
+					if (like == 1 && itemRelationship.like == 1){
+						UserNode otherNode = itemRelationship.startNode;
+						for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
+							if (subscribedRelationship.startNode.id.equals(otherNode.id)){
+								subscribedRelationship.setScore(subscribedRelationship.getScore() + 1);
+								updatedSubscribedRelationships.add(subscribedRelationship);
+							} else if (subscribedRelationship.endNode.id.equals(otherNode.id)){
+								subscribedRelationship.setScore(subscribedRelationship.getScore() + 1);
+								updatedSubscribedRelationships.add(subscribedRelationship);
+							}
+						}
+					}
+			}
+			
+			
+			
+			for (UserNode itemBroadcastNode: itemBroadcastNodes){
+				ItemRelationship itemRelationship = neo4jTemplate.createRelationshipBetween(userNode, itemBroadcastNode, ItemRelationship.class, "ITEM", true);
+				itemRelationship.setItemName(item);
+				itemRelationship.setLike(like);
+				newItemRelationships.add(itemRelationship);
+			}
+			
+			
+			List<UserDocument> usersToQueue = userDocumentRepo.findByNameIn(broadcastNames);
+			for (UserDocument userDocument: usersToQueue){
+				userDocument.enQueue(item);
+			}
+			
+			itemRelationshipRepo.delete(itemRelationships);
+			itemRelationshipRepo.save(newItemRelationships);
+			subscribedRelationshipRepo.save(updatedSubscribedRelationships);
+			userDocumentRepo.save(usersToQueue);
+			
 			tx.success();
 		} finally{
 			tx.close();
 		}
-		
-		List<UserDocument> usersToQueue = userDocumentRepo.findByNameIn(broadcastNames);
-		for (UserDocument userDocument: usersToQueue){
-			userDocument.enQueue(item);
-		}
-		
-		userDocumentRepo.save(usersToQueue);
 		
 		return "success";
 	}
