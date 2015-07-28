@@ -29,6 +29,8 @@ import core.mysql.User;
 import core.mysql.UserRepository;
 import core.neo4j.ItemRelationship;
 import core.neo4j.ItemRelationshipRepository;
+import core.neo4j.MatchedRelationship;
+import core.neo4j.MatchedRelationshipRepository;
 import core.neo4j.SubscribedRelationship;
 import core.neo4j.SubscribedRelationshipRepository;
 import core.neo4j.UserNode;
@@ -60,28 +62,27 @@ public class ItemController {
 	private String awsFederatedUserPolicy;
 
 	@RequestMapping(value="/getitems")
-	public QueueResp getS3Credentials(@RequestHeader(value="Authorization") String token){
+	public QueueResp getItems(@RequestHeader(value="Authorization") String token){
 		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));
 		String name = user.getUsername();
 		UserDocument userDocument = userDocumentRepo.findByName(name);
 		List<String> queue = userDocument.getQueue();
-		if (queue == null || queue.isEmpty()) {
+		if (queue == null || queue.size() < 5) {
 			List<String> newItems = new ArrayList<String>();
 			Random r = new Random(System.currentTimeMillis());
-			int startId = r.nextInt(((int)imageRepo.count()))-10;
-			List<Image> listOfImages = imageRepo.findByIdBetween(startId, startId+9);
+			int startId = r.nextInt(((int)imageRepo.count()))-5;
+			List<Image> listOfImages = imageRepo.findByIdBetween(startId, startId+4);
 			for (Image image: listOfImages){
 				newItems.add(image.getHash());
 			}
 			userDocument.enQueueAll(newItems);
 			userDocumentRepo.save(userDocument);
-			queue = newItems;
 		}
-		return new QueueResp(queue);
+		return new QueueResp(userDocument.getQueue());
 	}
 	
 	@RequestMapping(value="/gets3credentials", method=RequestMethod.GET)
-	public Credentials getItems(@RequestHeader(value="Authorization") String token){
+	public Credentials getS3Credentials(@RequestHeader(value="Authorization") String token){
 		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));
 		String name = user.getUsername();
 		AWSSecurityTokenServiceClient stsClient = new AWSSecurityTokenServiceClient();
@@ -102,65 +103,27 @@ public class ItemController {
 		String name = user.getUsername();
 		
 		Integer like = 1;
-		List<String> broadcastNames = null;
 		
 		
 		Transaction tx = graphDatabase.beginTx();
 		try {
 			UserNode userNode = userNodeRepo.findByName(name);
 			
-			Set<SubscribedRelationship> subscribedRelationships = subscribedRelationshipRepo.findByUserNodeId(userNode.id);
-			broadcastNames = new ArrayList<String>();
-			for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
-				if (subscribedRelationship.startNode.id.equals(userNode.id)){
-					broadcastNames.add(subscribedRelationship.endNode.name);
-				} else {
-					broadcastNames.add(subscribedRelationship.startNode.name);
-				}
-			}
-			
-			
-			Set<ItemRelationship> itemRelationships = itemRelationshipRepo.findByEndNodeIdAndItemName(userNode.id, item);
+			Set<SubscribedRelationship> subscribedRelationships = subscribedRelationshipRepo.findByUserNodeId(userNode.id);			
 //			subscribedRelationshipRepo.save(subscribedRelationships);
 			List<SubscribedRelationship> updatedSubscribedRelationships = new ArrayList<SubscribedRelationship>();
 			List<ItemRelationship> newItemRelationships = new ArrayList<ItemRelationship>();
 			List<UserNode> itemBroadcastNodes = new ArrayList<UserNode>();
+			List<String> broadcastNodeNames = new ArrayList<String>();
 			for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
 				if (subscribedRelationship.startNode.id.equals(userNode.id)){
 					itemBroadcastNodes.add(subscribedRelationship.endNode);
+					broadcastNodeNames.add(subscribedRelationship.endNode.name);
 				} else {
 					itemBroadcastNodes.add(subscribedRelationship.startNode);
+					broadcastNodeNames.add(subscribedRelationship.startNode.name);
 				}
 			}
-
-
-			List<UserNode> deleteBroadcastNodes = new ArrayList<UserNode>();
-			for (UserNode itemBroadcastNode : itemBroadcastNodes){
-				for (ItemRelationship itemRelationship: itemRelationships){
-					if (itemRelationship.startNode.id.equals(itemBroadcastNode.id)){
-						deleteBroadcastNodes.add(itemBroadcastNode);
-					}
-				}
-			}
-			
-			itemBroadcastNodes.removeAll(deleteBroadcastNodes);
-
-
-			for (ItemRelationship itemRelationship: itemRelationships){
-					if (like == 1 && itemRelationship.like == 1){
-						UserNode otherNode = itemRelationship.startNode;
-						for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
-							if (subscribedRelationship.startNode.id.equals(otherNode.id)){
-								subscribedRelationship.setScore(subscribedRelationship.getScore() + 1);
-								updatedSubscribedRelationships.add(subscribedRelationship);
-							} else if (subscribedRelationship.endNode.id.equals(otherNode.id)){
-								subscribedRelationship.setScore(subscribedRelationship.getScore() + 1);
-								updatedSubscribedRelationships.add(subscribedRelationship);
-							}
-						}
-					}
-			}
-			
 			
 			
 			for (UserNode itemBroadcastNode: itemBroadcastNodes){
@@ -171,18 +134,20 @@ public class ItemController {
 			}
 			
 			
-			List<UserDocument> usersToQueue = userDocumentRepo.findByNameIn(broadcastNames);
+			List<UserDocument> usersToQueue = userDocumentRepo.findByNameIn(broadcastNodeNames);
 			for (UserDocument userDocument: usersToQueue){
 				userDocument.enQueue(item);
 			}
 			
-			itemRelationshipRepo.delete(itemRelationships);
 			itemRelationshipRepo.save(newItemRelationships);
 			subscribedRelationshipRepo.save(updatedSubscribedRelationships);
 			userDocumentRepo.save(usersToQueue);
 			
 			tx.success();
-		} finally{
+		} catch (Exception e){
+			return "failure";
+		}
+		finally{
 			tx.close();
 		}
 		
@@ -201,6 +166,10 @@ public class ItemController {
 			return "failure";
 		}
 		
+		if (!serverItem.startsWith("item/")){
+			return "failure";
+		}
+		
 		Transaction tx = graphDatabase.beginTx();
 		try {
 			UserNode userNode = userNodeRepo.findByName(name);
@@ -209,8 +178,12 @@ public class ItemController {
 			Set<SubscribedRelationship> subscribedRelationships = subscribedRelationshipRepo.findByUserNodeId(userNode.id);
 //			subscribedRelationshipRepo.save(subscribedRelationships);
 			List<SubscribedRelationship> updatedSubscribedRelationships = new ArrayList<SubscribedRelationship>();
+			List<SubscribedRelationship> unmatchedSubscribedRelationships = new ArrayList<SubscribedRelationship>();
+			List<SubscribedRelationship> matchedSubscribedRelationships = new ArrayList<SubscribedRelationship>();
+			List<ItemRelationship> matchedItemRelationships = new ArrayList<ItemRelationship>();
 			List<ItemRelationship> newItemRelationships = new ArrayList<ItemRelationship>();
 			List<UserNode> itemBroadcastNodes = new ArrayList<UserNode>();
+			List<String> matchedUserNames = new ArrayList<String>();
 			for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
 				if (subscribedRelationship.startNode.id.equals(userNode.id)){
 					itemBroadcastNodes.add(subscribedRelationship.endNode);
@@ -256,16 +229,44 @@ public class ItemController {
 				newItemRelationships.add(itemRelationship);
 			}
 			
+			for (SubscribedRelationship updatedSubscribedRelationship: updatedSubscribedRelationships){
+				if (updatedSubscribedRelationship.getScore() >= 3){
+					matchedSubscribedRelationships.add(updatedSubscribedRelationship);
+					if (updatedSubscribedRelationship.startNode.id == userNode.id){
+						matchedItemRelationships.addAll(itemRelationshipRepo.findItemsBetweenNodes(userNode.id, updatedSubscribedRelationship.endNode.id));
+						matchedUserNames.add(updatedSubscribedRelationship.endNode.name);
+					} else {
+						matchedItemRelationships.addAll(itemRelationshipRepo.findItemsBetweenNodes(userNode.id, updatedSubscribedRelationship.startNode.id));
+						matchedUserNames.add(updatedSubscribedRelationship.startNode.name);
+					}
+					
+
+				} else {
+					unmatchedSubscribedRelationships.add(updatedSubscribedRelationship);
+				}
+			}
+			
+
+			List<UserDocument> otherMatchedUserDocuments = userDocumentRepo.findByNameIn(matchedUserNames);
+			for (UserDocument otherMatchedUserDocument : otherMatchedUserDocuments){
+				otherMatchedUserDocument.enQueue("matched/" + userDocument.getName());
+				userDocument.enQueue("matched/" + otherMatchedUserDocument.getName());
+			}
+
+			
 			itemRelationshipRepo.delete(itemRelationships);
 			itemRelationshipRepo.save(newItemRelationships);
-			subscribedRelationshipRepo.save(updatedSubscribedRelationships);
+			itemRelationshipRepo.delete(matchedItemRelationships);
+			subscribedRelationshipRepo.save(unmatchedSubscribedRelationships);
+			subscribedRelationshipRepo.delete(matchedSubscribedRelationships);
+			userDocumentRepo.save(userDocument);
+			userDocumentRepo.save(otherMatchedUserDocuments);
 
 			tx.success();
 		} finally{
 			tx.close();
 		}
 		
-		userDocumentRepo.save(userDocument);
 		return "success";
 	}
 }

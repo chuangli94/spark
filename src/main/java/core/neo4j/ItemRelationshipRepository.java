@@ -13,6 +13,7 @@ public interface ItemRelationshipRepository extends GraphRepository<ItemRelation
 	@Query(value= "match (n)<-[i{itemName:{1}}]-(in) where id(n) = {0} and type(i) = 'ITEM' return id(i) as id, startNode(i) as startNode, "
 			+ "endNode(i) as endNode, i.itemName as itemName, i.like as like", elementClass=ItemRelationship.class)	
 	Set<ItemRelationship> findByEndNodeIdAndItemName(Long nodeId, String itemName);
-	
-	
+	@Query(value= "match (n)-[i]-(in) where id(n) = {0} and id(in) = {1} and type(i) = 'ITEM' return id(i) as id, startNode(i) as startNode, "
+			+ "endNode(i) as endNode, i.itemName as itemName, i.like as like", elementClass=ItemRelationship.class)
+	Set<ItemRelationship> findItemsBetweenNodes(Long nodeId, Long nodeId2);
 }

@@ -13,6 +13,7 @@ public class UserDocument {
 	private String id;
 	
 	private String name;
+	private String profilePictureKey;
 	private List<String> queue;
 	private List<String> alreadySeen;
 	
@@ -22,6 +23,15 @@ public class UserDocument {
 		this.name = name;
 		this.queue = queue;
 		this.alreadySeen = alreadySeen;
+		this.profilePictureKey = null;
+	}
+	
+	public void setProfilePictureKey(String profilePictureKey){
+		this.profilePictureKey = profilePictureKey;
+	}
+	
+	public String getProfilePictureKey(){
+		return this.profilePictureKey;
 	}
 	
 	public void enQueue(String item){
