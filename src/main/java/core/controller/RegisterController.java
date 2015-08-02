@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import core.mongodb.UserDocument;
@@ -57,8 +55,7 @@ public class RegisterController {
 	@Value("${awsuseruploadbucketname}")
 	private String awsBucketName;
 
-	
-	@Transactional
+	@Transactional("mysqlTransactionManager")
 	@RequestMapping(value="/signup", method=RequestMethod.GET)
 	public RegistrationResp registerUsernameAndPassword(@RequestHeader(value="Username") String username, 
 			@RequestHeader(value="Password") String password, @RequestHeader(value="Longitude") Double longitude, 
@@ -70,7 +67,7 @@ public class RegisterController {
 			userRepo.save(user);
 			authRepo.save(authority);
 			
-			UserDocument userDocument = new UserDocument(username, new ArrayList<String>(), new ArrayList<String>());
+			UserDocument userDocument = new UserDocument(username, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>());
 			userDocumentRepo.save(userDocument);
 
 			Transaction tx = graphDatabase.beginTx();			
@@ -100,8 +97,11 @@ public class RegisterController {
 		} else return new RegistrationResp("duplicate");
 	}
 	
+	@Transactional("mysqlTransactionManager")
 	@RequestMapping(value="/signupfb", method=RequestMethod.GET)
-	public RegistrationResp registerFb(@RequestHeader(value="FBAccessToken") String fbAccessToken, @RequestHeader(value="FBUserId") String fbUserId){
+	public RegistrationResp registerFb(@RequestHeader(value="FBAccessToken") String fbAccessToken,
+			@RequestHeader(value="FBUserId") String fbUserId, @RequestHeader(value="Longitude") Double longitude, 
+			@RequestHeader(value="Latitude") Double latitude, @RequestHeader(value="GcmRegId") String gcmRegId){
 		
 		RestTemplate restTemplate = new RestTemplate();
         MappingJackson2HttpMessageConverter jsonToPojo = new MappingJackson2HttpMessageConverter();

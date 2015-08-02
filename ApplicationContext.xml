@@ -1,0 +1,2 @@
+<context:annotation-config />
+<tx:annotation-driven />

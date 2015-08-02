@@ -3,7 +3,6 @@ package core.neo4j;
 import java.util.Set;
 
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.CypherDslRepository;
 import org.springframework.data.neo4j.repository.GraphRepository;
 
 public interface SubscribedRelationshipRepository extends GraphRepository<SubscribedRelationship>{

@@ -29,13 +29,12 @@ import core.mysql.User;
 import core.mysql.UserRepository;
 import core.neo4j.ItemRelationship;
 import core.neo4j.ItemRelationshipRepository;
-import core.neo4j.MatchedRelationship;
-import core.neo4j.MatchedRelationshipRepository;
 import core.neo4j.SubscribedRelationship;
 import core.neo4j.SubscribedRelationshipRepository;
 import core.neo4j.UserNode;
 import core.neo4j.UserNodeRepository;
 import core.response.QueueResp;
+import core.wordutils.MultiplierCalculator;
 
 @RestController
 public class ItemController {
@@ -98,65 +97,6 @@ public class ItemController {
 	}
 	
 	
-	@RequestMapping(value="/app/broadcastitem", method=RequestMethod.GET)
-	public String broadcastItem(@RequestHeader(value="Authorization") String token, @RequestHeader(value="Item") String item){
-		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));
-		String name = user.getUsername();
-		
-		Integer like = 1;
-		
-		
-		Transaction tx = graphDatabase.beginTx();
-		try {
-			UserNode userNode = userNodeRepo.findByName(name);
-			
-			Set<SubscribedRelationship> subscribedRelationships = subscribedRelationshipRepo.findByUserNodeId(userNode.id);			
-//			subscribedRelationshipRepo.save(subscribedRelationships);
-			List<SubscribedRelationship> updatedSubscribedRelationships = new ArrayList<SubscribedRelationship>();
-			List<ItemRelationship> newItemRelationships = new ArrayList<ItemRelationship>();
-			List<UserNode> itemBroadcastNodes = new ArrayList<UserNode>();
-			List<String> broadcastNodeNames = new ArrayList<String>();
-			for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
-				if (subscribedRelationship.startNode.id.equals(userNode.id)){
-					itemBroadcastNodes.add(subscribedRelationship.endNode);
-					broadcastNodeNames.add(subscribedRelationship.endNode.name);
-				} else {
-					itemBroadcastNodes.add(subscribedRelationship.startNode);
-					broadcastNodeNames.add(subscribedRelationship.startNode.name);
-				}
-			}
-			
-			
-			for (UserNode itemBroadcastNode: itemBroadcastNodes){
-				ItemRelationship itemRelationship = neo4jTemplate.createRelationshipBetween(userNode, itemBroadcastNode, ItemRelationship.class, "ITEM", true);
-				itemRelationship.setItemName(item);
-				itemRelationship.setLike(like);
-				newItemRelationships.add(itemRelationship);
-			}
-			
-			
-			List<UserDocument> usersToQueue = userDocumentRepo.findByNameIn(broadcastNodeNames);
-			for (UserDocument userDocument: usersToQueue){
-				userDocument.enQueue(item);
-			}
-			
-			itemRelationshipRepo.save(newItemRelationships);
-			subscribedRelationshipRepo.save(updatedSubscribedRelationships);
-			userDocumentRepo.save(usersToQueue);
-			
-			tx.success();
-		} catch (Exception e){
-			return "failure";
-		}
-		finally{
-			tx.close();
-		}
-		
-		return "success";
-	}
-	
-	
-	@Transactional
 	@RequestMapping(value="/app/pushitem", method=RequestMethod.GET)
 	public String pushItem(@RequestHeader(value="Authorization") String token, @RequestHeader(value="Item") String item, @RequestHeader(value="Like") Integer like){
 		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));
@@ -209,12 +149,20 @@ public class ItemController {
 			for (ItemRelationship itemRelationship: itemRelationships){
 					if (like == 1 && itemRelationship.like == 1){
 						UserNode otherNode = itemRelationship.startNode;
+
 						for (SubscribedRelationship subscribedRelationship: subscribedRelationships){
 							if (subscribedRelationship.startNode.id.equals(otherNode.id)){
-								subscribedRelationship.setScore(subscribedRelationship.getScore() + 1);
+								UserDocument otherDocument = userDocumentRepo.findByName(otherNode.name);
+
+								float base = 1;
+								float multiplier = MultiplierCalculator.calculateMultipler(userDocument.getCategoriesScore(), otherDocument.getCategoriesScore());
+								subscribedRelationship.setScore(subscribedRelationship.getScore() + (base * multiplier));
 								updatedSubscribedRelationships.add(subscribedRelationship);
 							} else if (subscribedRelationship.endNode.id.equals(otherNode.id)){
-								subscribedRelationship.setScore(subscribedRelationship.getScore() + 1);
+								UserDocument otherDocument = userDocumentRepo.findByName(otherNode.name);
+								float base = 1;
+								float multiplier = MultiplierCalculator.calculateMultipler(userDocument.getCategoriesScore(), otherDocument.getCategoriesScore());
+								subscribedRelationship.setScore(subscribedRelationship.getScore() + (base * multiplier));
 								updatedSubscribedRelationships.add(subscribedRelationship);
 							}
 						}
@@ -231,7 +179,7 @@ public class ItemController {
 			}
 			
 			for (SubscribedRelationship updatedSubscribedRelationship: updatedSubscribedRelationships){
-				if (updatedSubscribedRelationship.getScore() >= 3){
+				if (updatedSubscribedRelationship.getScore() >= 5){
 					matchedSubscribedRelationships.add(updatedSubscribedRelationship);
 					if (updatedSubscribedRelationship.startNode.id == userNode.id){
 						matchedItemRelationships.addAll(itemRelationshipRepo.findItemsBetweenNodes(userNode.id, updatedSubscribedRelationship.endNode.id));

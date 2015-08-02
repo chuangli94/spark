@@ -1,25 +1,23 @@
 package core.config;
 
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = { "core.mysql"})
+@EnableJpaRepositories(basePackages = { "core.mysql" })
 public class MySqlConfig {
     @Value("${spring.datasource.driverClassName}")
     private String databaseDriverClassName;
@@ -32,10 +30,10 @@ public class MySqlConfig {
  
     @Value("${spring.datasource.password}")
     private String databasePassword;
-	
+    
 	@Primary
 	@Bean(name = "mysqlDataSource")
-	public DataSource DataSource(){
+	public DataSource dataSource(){
 		org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
         ds.setDriverClassName(databaseDriverClassName);
         ds.setUrl(datasourceUrl);
@@ -43,6 +41,28 @@ public class MySqlConfig {
         ds.setPassword(databasePassword);
         return ds;
 	}
+}
+
+	
+//	@Bean
+//	public LocalContainerEntityManagerFactoryBean tagEntityManagerFactory(
+//	        EntityManagerFactoryBuilder builder) {
+//	    return builder
+//	            .dataSource(DataSource())
+//	            .packages(Tag.class)
+//	            .persistenceUnit("tags")
+//	            .build();
+//	}
+//	
+//	@Bean
+//	public LocalContainerEntityManagerFactoryBean imageEntityManagerFactory(
+//	        EntityManagerFactoryBuilder builder) {
+//	    return builder
+//	            .dataSource(DataSource())
+//	            .packages(Image.class)
+//	            .persistenceUnit("images")
+//	            .build();
+//	}
 	
 //	@Bean(name = "mysqlEntityManager")
 //	public EntityManager entityManager(){
@@ -64,4 +84,4 @@ public class MySqlConfig {
 //	public PlatformTransactionManager transactionManager(){
 //		return new JpaTransactionManager(entityManagerFactory());
 //	}
-}
+

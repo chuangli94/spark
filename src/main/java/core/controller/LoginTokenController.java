@@ -1,9 +1,9 @@
 package core.controller;
 
 import java.io.Serializable;
+
 import core.mysql.UserRepository;
-import core.mysql.User;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +42,7 @@ public class LoginTokenController {
 	@Autowired
 	UserRepository userRepo;
 	
-	
+	@Transactional("mysqlTransactionManager")
 	@RequestMapping(method=RequestMethod.GET)
 	public OAuth2AccessToken loginToken() {
 		

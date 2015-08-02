@@ -19,7 +19,7 @@ public class Neo4jConfig extends Neo4jConfiguration{
 	setBasePackage("core.neo4j");
 	}
 
-	@Bean()
+	@Bean
 	public GraphDatabaseService graphDatabaseService(@Value("${neo4j.url}") String neo4jUrl, @Value("${neo4j.username}") String neo4jUsername, @Value("${neo4j.password}")
 	String neo4jPassword) {
 	    return new SpringRestGraphDatabase(neo4jUrl, neo4jUsername, neo4jPassword);

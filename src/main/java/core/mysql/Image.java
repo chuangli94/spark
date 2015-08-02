@@ -26,14 +26,17 @@ public class Image implements Serializable{
 	@Column
 	private String tags;
 	
+	@Column
+	private String categories;
 	
 	protected Image (){}
 
 	
-	public Image(String hash, String query, String tags){
+	public Image(String hash, String query, String tags, String categories){
 		this.hash = hash;
 		this.query = query;
 		this.tags = tags;
+		this.categories = categories;
 	}
 	
 	
@@ -43,6 +46,14 @@ public class Image implements Serializable{
 	
 	public void setHash(String hash){
 		this.hash = hash;
+	}
+	
+	public String getCategories(){
+		return categories;
+	}
+	
+	public void setCategories(String categories){
+		this.categories = categories;
 	}
 	
 	public String getQuery(){

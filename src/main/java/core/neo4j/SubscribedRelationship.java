@@ -1,13 +1,9 @@
 package core.neo4j;
 
-import org.springframework.data.neo4j.annotation.EndNode;
-import org.springframework.data.neo4j.annotation.Fetch;
 import org.springframework.data.neo4j.annotation.GraphId;
-import org.springframework.data.neo4j.annotation.GraphProperty;
 import org.springframework.data.neo4j.annotation.QueryResult;
 import org.springframework.data.neo4j.annotation.RelationshipEntity;
 import org.springframework.data.neo4j.annotation.ResultColumn;
-import org.springframework.data.neo4j.annotation.StartNode;
 
 @QueryResult
 @RelationshipEntity(type="SUBSCRIBED") 
@@ -23,7 +19,7 @@ public class SubscribedRelationship {
 	public UserNode endNode;
 
 	@ResultColumn("score")
-	public int score;
+	public float score;
 	
 	public SubscribedRelationship(){
 	}
@@ -43,11 +39,11 @@ public class SubscribedRelationship {
 		return id;
 	}
 	
-	public void setScore(int score){
+	public void setScore(float score){
 		this.score = score;
 	}
 	
-	public int getScore(){
+	public float getScore(){
 		return score;
 	}
 	public void setEndNode(UserNode endNode){

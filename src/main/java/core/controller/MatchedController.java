@@ -1,7 +1,5 @@
 package core.controller;
 
-import java.util.Set;
-
 import org.neo4j.graphdb.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.core.GraphDatabase;
@@ -16,12 +14,10 @@ import core.mongodb.UserDocument;
 import core.mongodb.UserDocumentRepository;
 import core.mysql.User;
 import core.mysql.UserRepository;
-import core.neo4j.ItemRelationship;
 import core.neo4j.LinkedRelationship;
 import core.neo4j.LinkedRelationshipRepository;
 import core.neo4j.MatchedRelationship;
 import core.neo4j.MatchedRelationshipRepository;
-import core.neo4j.SubscribedRelationship;
 import core.neo4j.UserNode;
 import core.neo4j.UserNodeRepository;
 
@@ -42,7 +38,6 @@ public class MatchedController {
 	@Autowired
 	UserDocumentRepository userDocumentRepo;
 	
-	@Transactional
 	@RequestMapping(value="/app/pushmatched", method=RequestMethod.GET)
 	public String pushMatched(@RequestHeader(value="Authorization") String token, @RequestHeader(value="Matched") String matched, @RequestHeader(value="Like") Integer like){
 		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));

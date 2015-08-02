@@ -33,7 +33,7 @@ import core.mongodb.UserDocument;
 import core.mongodb.UserDocumentRepository;
 import core.mysql.User;
 import core.mysql.UserRepository;
-import core.thread.MediaProcessThread;
+import core.task.ProfilePicProcessThread;
 
 @RestController
 public class ProfileController {
@@ -77,7 +77,7 @@ public class ProfileController {
 			return null;
 		}
 		
-		new Thread(new MediaProcessThread(token, bi, fileName, name) {
+		new Thread(new ProfilePicProcessThread(token, bi, fileName, name, null) {
 		    public void run() {
 		    	File tempFile = null;
 		    	try {

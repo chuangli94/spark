@@ -28,14 +28,30 @@ repositories{
 	maven{
 		url "http://repo.spring.io/libs-snapshot-continuous-local"
 	}
+	maven{
+		url "http://repo.spring.io"
+	}
 
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (it.requested.group == 'org.springframework') {
+                it.useVersion '4.2.0+'
+            }
+        }
+    }
+}
+
 dependencies {
+	compile("org.xerial:sqlite-jdbc:3.7.2")
 	compile("net.coobird:thumbnailator:0.4.8")
+	compile("edu.mit:jwi:2.2.3")
+	compile("edu.washington.cs.knowitall:morpha-stemmer:1.0.5")
 	compile("org.springframework.boot:spring-boot-starter-web:1.2.4.RELEASE")
 	compile("org.springframework.boot:spring-boot-starter-data-jpa:1.2.4.RELEASE")
 	compile("org.springframework.boot:spring-boot-starter-actuator:1.2.4.RELEASE")
@@ -48,6 +64,12 @@ dependencies {
 	compile("mysql:mysql-connector-java:5.1.35")
 	compile("com.amazonaws:aws-java-sdk-s3:1.10.2")
 	compile("com.amazonaws:aws-java-sdk-sts:1.10.2")
+	
+	
+	//dependencies not on a repo
+	
+	compile files("lib/ws4j-1.0.1.jar")
+	compile files("lib/jawjaw-1.0.2.jar")
 	
 /*	testCompile(group: 'org.neo4j', 
                name: 'neo4j-ogm-test', 
