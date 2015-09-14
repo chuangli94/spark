@@ -134,9 +134,14 @@ public class ProfileController {
 			                System.out.println("Error Message: " + ace.getMessage());
 			            }
 		            
+		            // update mongodb
 		            UserDocument userDocument = userDocumentRepo.findByName(name);
 		            userDocument.setProfilePictureKey(key);
 		            userDocumentRepo.save(userDocument);
+		            
+		            // update SQL library as well
+		            user.setProfilePic(key);
+		            userRepo.save(user);
 		            
 
 				} catch (Exception e){

@@ -1,6 +1,7 @@
 package core.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -21,6 +22,7 @@ import com.amazonaws.services.securitytoken.model.Credentials;
 import com.amazonaws.services.securitytoken.model.GetFederationTokenRequest;
 import com.amazonaws.services.securitytoken.model.GetFederationTokenResult;
 
+import core.mongodb.Match;
 import core.mongodb.UserDocument;
 import core.mongodb.UserDocumentRepository;
 import core.mysql.Image;
@@ -67,7 +69,7 @@ public class ItemController {
 		String name = user.getUsername();
 		UserDocument userDocument = userDocumentRepo.findByName(name);
 		List<String> queue = userDocument.getQueue();
-		if (queue == null || queue.size() < 5) {
+		/*if (queue == null || queue.size() < 5) {
 			List<String> newItems = new ArrayList<String>();
 			Random r = new Random(System.currentTimeMillis());
 			int startId = r.nextInt(((int)imageRepo.count()))-5;
@@ -76,9 +78,53 @@ public class ItemController {
 				newItems.add(image.getHash());
 			}
 			userDocument.enQueueAll(newItems);
-			userDocumentRepo.save(userDocument);
 		}
-		return new QueueResp(userDocument.getQueue());
+		if (userDocument.getUnshownMatch() != null) {
+			userDocument.enQueue("matched/");
+		}
+		List<String> seenItems = new ArrayList<String>();
+		seenItems.addAll(userDocument.getQueue());
+		QueueResp res = new QueueResp(seenItems);
+		userDocument.deQueueAll();
+		userDocument.addAlreadySeen(seenItems);
+		userDocumentRepo.save(userDocument);*/
+		
+		List<String> newItems = new ArrayList<String>();
+		Random r = new Random(System.currentTimeMillis());
+		int startId = r.nextInt(((int)imageRepo.count()))-5;
+		List<Image> listOfImages = imageRepo.findByIdBetween(startId, startId+4);
+		for (Image image: listOfImages){
+			newItems.add(image.getHash());
+		}
+		if (userDocument.getUnshownMatch() != null) {
+			newItems.add("/matched");
+		}
+		userDocument.addAlreadySeen(newItems);
+		userDocumentRepo.save(userDocument);
+		return new QueueResp(newItems);
+	}
+	
+	@RequestMapping(value="/app/getmatches")
+	public List<String> getMatches(@RequestHeader(value="Authorization") String token) {
+		final int NUMBER_OF_USERS = 3;
+		User user = userRepo.findByAccessToken(token.substring("Bearer ".length()));
+		String name = user.getUsername();
+		UserDocument userDocument = userDocumentRepo.findByName(name);
+		Match match = userDocument.getUnshownMatch();
+		if (match == null) {
+			return null;
+		}
+		
+		match.setShown(true);
+		userDocumentRepo.save(userDocument);
+		List<String> userNames = new ArrayList<>();
+		List<User> randomUsers = userRepo.findRandomUser(name, NUMBER_OF_USERS-1);
+		for (User randomUser : randomUsers) {
+			userNames.add(randomUser.getUsername());
+		}
+		userNames.add(match.getName());
+		Collections.shuffle(userNames, new Random(System.currentTimeMillis()));
+		return userNames;
 	}
 	
 	@RequestMapping(value="/app/gets3credentials", method=RequestMethod.GET)
@@ -95,7 +141,6 @@ public class ItemController {
 		Credentials federationTokenCredentials = federationTokenResult.getCredentials();
 		return federationTokenCredentials;
 	}
-	
 	
 	@RequestMapping(value="/app/pushitem", method=RequestMethod.GET)
 	public String pushItem(@RequestHeader(value="Authorization") String token, @RequestHeader(value="Item") String item, @RequestHeader(value="Like") Integer like){
@@ -196,10 +241,13 @@ public class ItemController {
 			}
 			
 
+			// enqueue the matched users profile pic as new items
 			List<UserDocument> otherMatchedUserDocuments = userDocumentRepo.findByNameIn(matchedUserNames);
 			for (UserDocument otherMatchedUserDocument : otherMatchedUserDocuments){
-				otherMatchedUserDocument.enQueue("matched/" + userDocument.getName());
-				userDocument.enQueue("matched/" + otherMatchedUserDocument.getName());
+				//otherMatchedUserDocument.enQueue("matched/");
+				otherMatchedUserDocument.addMatch(new Match(userDocument.getName(), false));
+				//userDocument.enQueue("matched/");
+				userDocument.addMatch(new Match(otherMatchedUserDocument.getName(), false));
 			}
 
 			

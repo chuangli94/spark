@@ -19,7 +19,7 @@ public class User implements Serializable {
 	private int id;
 	
 	@Id
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String username;
 	
 	@Column(nullable = false)
@@ -33,6 +33,9 @@ public class User implements Serializable {
 	
 	@Column
 	private String gcmRegId;
+	
+	@Column
+	private String profilePic;
 	
 	protected User() {}
 	
@@ -88,6 +91,14 @@ public class User implements Serializable {
 	
 	public void setPassword(String password){
 		this.password = password;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
+	}
+	
+	public String getProfilePic() {
+		return this.profilePic;
 	}
 
 }
