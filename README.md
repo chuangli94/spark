@@ -1,5 +1,11 @@
 # spark
-Interest and Image Based dating using Geolocation
+<b>Interest and Image Based dating using Geolocation</b>
+
+- Matches users based on geolocation, interests, and personality
+
+- Analyzes user uploaded images and integrates Facebook API to categorize users
+
+- Uses Neo4j to store user relationships and MongoDB to store image queues
 
 
 To get the project from github:
