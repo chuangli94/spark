@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import core.event.UpdateTagEvent;
-import core.mysql.TagRepository;
-import core.mysql.User;
-import core.mysql.UserRepository;
+import core.postgresql.TagRepository;
+import core.postgresql.User;
+import core.postgresql.UserRepository;
 import core.task.MediaProcessTask;
 
 @EnableAsync

@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 
 
 import java.io.Serializable;
@@ -14,11 +14,11 @@ import javax.persistence.Table;
 @Table(name="users")
 public class User implements Serializable {
 	
+	@Id
 	@Column(nullable = false)
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
-	@Id
 	@Column(nullable = false, unique = true)
 	private String username;
 	

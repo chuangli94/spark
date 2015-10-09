@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 import core.mongodb.Match;
 import core.mongodb.UserDocument;
 import core.mongodb.UserDocumentRepository;
-import core.mysql.User;
-import core.mysql.UserRepository;
 import core.neo4j.LinkedRelationship;
 import core.neo4j.LinkedRelationshipRepository;
 import core.neo4j.MatchedRelationship;
 import core.neo4j.MatchedRelationshipRepository;
 import core.neo4j.UserNode;
 import core.neo4j.UserNodeRepository;
+import core.postgresql.User;
+import core.postgresql.UserRepository;
 
 @RestController
 public class MatchedController {

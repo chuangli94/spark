@@ -61,6 +61,7 @@ dependencies {
 	compile("org.springframework.data:spring-data-neo4j:3.3.1.RELEASE")
 	compile("org.springframework.data:spring-data-neo4j-rest:3.3.1.RELEASE")
 	compile("org.springframework.data:spring-data-mongodb:1.7.1.RELEASE")
+	compile("org.postgresql:postgresql:9.4-1203-jdbc42")
 	compile("mysql:mysql-connector-java:5.1.35")
 	compile("com.amazonaws:aws-java-sdk-s3:1.10.2")
 	compile("com.amazonaws:aws-java-sdk-sts:1.10.2")

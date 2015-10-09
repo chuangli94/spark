@@ -18,12 +18,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 //@EnableAutoConfiguration
 //@ComponentScan("core.thread")
-public class MySqlPostConfig{
+public class PostgreSqlPostConfig{
 
 	@Autowired
 	LocalContainerEntityManagerFactoryBean entityManagerFactoryBean;
     
-    @Bean(name="mysqlTransactionManager")
+    @Bean(name="postgresqlTransactionManager")
     public PlatformTransactionManager transactionManager(){
        JpaTransactionManager transactionManager = new JpaTransactionManager();
        transactionManager.setEntityManagerFactory(

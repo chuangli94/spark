@@ -20,13 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import core.event.UpdateImageEvent;
 import core.event.UpdateTagEvent;
-import core.mysql.ImageRepository;
-import core.mysql.Tag;
-import core.mysql.TagRepository;
+import core.postgresql.ImageRepository;
+import core.postgresql.Tag;
+import core.postgresql.TagRepository;
 
 @Service
-@Transactional("mysqlTransactionManager")
-public class MySqlTaskQueue {
+@Transactional("postgresqlTransactionManager")
+public class PostgreSqlTaskQueue {
 	
 	@Autowired
 	TagRepository tagRepo;

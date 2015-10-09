@@ -31,8 +31,8 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import core.mongodb.UserDocument;
 import core.mongodb.UserDocumentRepository;
-import core.mysql.User;
-import core.mysql.UserRepository;
+import core.postgresql.User;
+import core.postgresql.UserRepository;
 import core.task.ProfilePicProcessThread;
 
 @RestController

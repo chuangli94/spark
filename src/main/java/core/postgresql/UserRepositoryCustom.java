@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 
 import java.util.ArrayList;
 import java.util.List;

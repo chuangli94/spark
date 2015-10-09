@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 
 import java.io.Serializable;
 
@@ -12,11 +12,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name="images")
 public class Image implements Serializable{
+	@Id
 	@Column(nullable = false)
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
-	@Id
+
 	@Column(nullable = false)
 	private String hash;
 	

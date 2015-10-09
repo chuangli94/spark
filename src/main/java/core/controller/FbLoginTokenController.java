@@ -2,8 +2,8 @@ package core.controller;
 
 import java.io.Serializable;
 
-import core.mysql.FbUserRepository;
-import core.mysql.FbUser;
+import core.postgresql.FbUser;
+import core.postgresql.FbUserRepository;
 import core.response.FbGraphTokenResp;
 
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class FbLoginTokenController {
 	@Autowired
 	private FbUserRepository fbUserRepo;
 	
-	@Transactional("mysqlTransactionManager")
+	@Transactional("postgresqlTransactionManager")
 	@RequestMapping(method=RequestMethod.GET)
 	public OAuth2AccessToken loginToken(@RequestHeader(value="FBAccessToken") String fbAccessToken, @RequestHeader(value="FBUserId") String fbUserId) {
 		

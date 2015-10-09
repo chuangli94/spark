@@ -2,7 +2,7 @@ package core.event;
 
 import org.springframework.context.ApplicationEvent;
 
-import core.mysql.Image;
+import core.postgresql.Image;
 
 public class UpdateImageEvent extends ApplicationEvent {
 	private Image image;

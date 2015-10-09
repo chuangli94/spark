@@ -2,7 +2,7 @@ package core.controller;
 
 import java.io.Serializable;
 
-import core.mysql.UserRepository;
+import core.postgresql.UserRepository;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +53,7 @@ public class LoginTokenController {
 		if (username == null){
 			return null;
 		}
-		List<core.mysql.User> users = userRepo.findByUsername(username);
+		List<core.postgresql.User> users = userRepo.findByUsername(username);
 		if (users.isEmpty() || users.size() != 1){
 			return null;
 		}
@@ -89,7 +89,7 @@ public class LoginTokenController {
 	    OAuth2Authentication oAuth2 = new OAuth2Authentication(oAuth2Request, authenticationToken);
 	    OAuth2AccessToken token = tokenServices.createAccessToken(oAuth2);
 	    
-		core.mysql.User user = users.get(0);
+		core.postgresql.User user = users.get(0);
 		user.setAccessToken(token.getValue());
 		userRepo.save(user);
 	    return token;

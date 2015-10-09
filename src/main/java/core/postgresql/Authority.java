@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 
 import java.io.Serializable;
 
@@ -13,14 +13,14 @@ import javax.persistence.Table;
 @Table(name="authorities")
 public class Authority implements Serializable {
 
+	@Id
 	@Column(nullable = false)
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
 	@Column(nullable = false)
 	private String authority;
 	
-	@Id
 	@Column(nullable = false)
 	private String username;
 	

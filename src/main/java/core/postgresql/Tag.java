@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 import java.io.Serializable;
 
 import javax.persistence.Column;
@@ -14,7 +14,7 @@ public class Tag implements Serializable {
 	
 	@Id
 	@Column(nullable = false)
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
 	@Column(nullable = false, unique = true )

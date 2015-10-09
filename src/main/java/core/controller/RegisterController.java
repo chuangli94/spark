@@ -21,16 +21,16 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import core.mongodb.UserDocument;
 import core.mongodb.UserDocumentRepository;
-import core.mysql.Authority;
-import core.mysql.AuthorityRepository;
-import core.mysql.FbUser;
-import core.mysql.FbUserRepository;
-import core.mysql.User;
-import core.mysql.UserRepository;
 import core.neo4j.SubscribedRelationship;
 import core.neo4j.SubscribedRelationshipRepository;
 import core.neo4j.UserNode;
 import core.neo4j.UserNodeRepository;
+import core.postgresql.Authority;
+import core.postgresql.AuthorityRepository;
+import core.postgresql.FbUser;
+import core.postgresql.FbUserRepository;
+import core.postgresql.User;
+import core.postgresql.UserRepository;
 import core.response.FbGraphTokenResp;
 import core.response.RegistrationResp;
 

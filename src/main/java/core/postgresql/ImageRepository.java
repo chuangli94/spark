@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 
 import java.util.List;
 
@@ -6,11 +6,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface KeywordRepository extends CrudRepository<Keyword, Long>{
-
-	List<Keyword> findByName(String name);
+public interface ImageRepository extends CrudRepository<Image, Long>{
+	List<Image> findByHash(String hash);
 	
-	List<Keyword> findAll();
+	List<Image> findByIdBetween(int startId, int endId);
 	
-	Keyword findById(Integer id);
+	long count();
 }
+

@@ -17,8 +17,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = { "core.mysql" })
-public class MySqlConfig {
+@EnableJpaRepositories(basePackages = { "core.postgresql" })
+public class PostgreSqlConfig {
     @Value("${spring.datasource.driverClassName}")
     private String databaseDriverClassName;
  
@@ -32,7 +32,7 @@ public class MySqlConfig {
     private String databasePassword;
     
 	@Primary
-	@Bean(name = "mysqlDataSource")
+	@Bean(name = "postgresqlDataSource")
 	public DataSource dataSource(){
 		org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
         ds.setDriverClassName(databaseDriverClassName);

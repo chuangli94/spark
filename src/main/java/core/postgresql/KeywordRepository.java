@@ -1,4 +1,4 @@
-package core.mysql;
+package core.postgresql;
 
 import java.util.List;
 
@@ -6,8 +6,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface FbUserRepository extends CrudRepository<FbUser, Long>{
+public interface KeywordRepository extends CrudRepository<Keyword, Long>{
 
-	List<FbUser> findByUserId(String userId) ;
+	List<Keyword> findByName(String name);
 	
+	List<Keyword> findAll();
+	
+	Keyword findById(Integer id);
 }
