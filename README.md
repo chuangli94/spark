@@ -1,4 +1,7 @@
 # spark
+
+<p>For Android client, check out https://github.com/0roboros/spark-android-client</p>
+
 <b>Interest and Image Based dating using Geolocation</b>
 
 - Matches users based on geolocation, interests, and personality
